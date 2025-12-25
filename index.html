@@ -4,232 +4,290 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kingshot Multi-Calculator</title>
-<style>
-  /* Color palette inspired by Kingshot Forgehammer calculator */
-  :root {
-    --primary-bg: #1e1e2f;
-    --secondary-bg: #2a2a40;
-    --card-bg: #2f2f48;
-    --text-color: #ffffff;
-    --accent-color: #f5a623;
-    --warn-color: #ff4c4c;
-    --button-bg: #f5a623;
-    --button-text: #1e1e2f;
-    --delete-color: #ff4c4c;
-  }
 
-  body { font-family: Arial, sans-serif; background: var(--primary-bg); padding: 20px; color: var(--text-color); }
-  h1, h2 { text-align: center; color: var(--accent-color); }
-  .container { max-width: 800px; margin: auto; background: var(--secondary-bg); padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,.5); }
-  .row { display: flex; align-items: center; margin-bottom: 10px; }
-  label { flex: 1; font-weight: bold; }
-  input, select, button { flex: 2; padding: 8px; margin-left: 10px; border-radius: 4px; border: none; }
-  input, select { background: #444466; color: var(--text-color); }
-  button { cursor: pointer; font-weight: bold; }
-  button#addUpgrade { background: var(--button-bg); color: var(--button-text); }
-  button#resetBtn { background: var(--delete-color); color: var(--text-color); margin-left: 10px; }
-  .log { margin-top: 15px; background: var(--card-bg); padding: 10px; border-radius: 6px; max-height: 220px; overflow-y: auto; }
-  .log-entry { border-bottom: 1px solid #555577; padding: 6px 0; position: relative; padding-left: 30px; }
-  .log-entry:last-child { border-bottom: none; }
-  .delete-btn { position: absolute; left: 0; top: 0; cursor: pointer; color: var(--delete-color); font-weight: bold; width: 25px; text-align: center; }
-  .warn { color: var(--warn-color); font-weight: bold; }
-  .error { color: var(--warn-color); font-weight: bold; margin-top: 10px; }
-  select option { background: var(--secondary-bg); color: var(--text-color); }
+<style>
+:root {
+  --primary-bg:#1e1e2f;
+  --secondary-bg:#2a2a40;
+  --card-bg:#2f2f48;
+  --text-color:#ffffff;
+  --accent-color:#f5a623;
+  --warn-color:#ff4c4c;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--primary-bg);
+  padding: 20px;
+  color: var(--text-color);
+}
+
+h1,h2,h3 { text-align:center; color:var(--accent-color); }
+
+.container {
+  max-width:800px;
+  margin:auto;
+  background:var(--secondary-bg);
+  padding:20px;
+  border-radius:8px;
+}
+
+.row {
+  display:flex;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+label { flex:1; font-weight:bold; }
+input,select,button {
+  flex:2;
+  padding:8px;
+  margin-left:10px;
+  border-radius:4px;
+  border:none;
+}
+
+input,select { background:#444466; color:#fff; }
+button { cursor:pointer; font-weight:bold; }
+
+#addUpgrade { background:var(--accent-color); color:#1e1e2f; }
+#resetBtn { background:var(--warn-color); color:#fff; margin-left:10px; }
+
+.log { margin-top:15px; }
+
+.upgrade-card {
+  position:relative;
+  background:linear-gradient(180deg,#2b2f4a,#1f2238);
+  border:1px solid var(--accent-color);
+  border-radius:10px;
+  padding:14px 18px 14px 44px;
+  margin-bottom:14px;
+}
+
+.upgrade-card h4 {
+  margin:0 0 6px 0;
+  color:var(--accent-color);
+}
+
+.upgrade-section {
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px dashed rgba(245,166,35,0.4);
+}
+
+.delete-btn {
+  position:absolute;
+  left:14px;
+  top:14px;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:rgba(0,0,0,0.6);
+  color:#ff6b6b;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.delete-btn:hover {
+  background:#ff4c4c;
+  color:#fff;
+}
+
+.warn { color:var(--warn-color); font-weight:bold; }
+.error { color:var(--warn-color); font-weight:bold; margin-top:10px; }
 </style>
 </head>
+
 <body>
 
 <h1>Kingshot Multi-Calculator</h1>
+
 <div class="container">
-  <h2>Select Calculator</h2>
-  <div class="row">
-    <label>Calculator</label>
-    <select id="calculatorSelect">
-      <option value="gov">Governor Gear</option>
-      <option value="charm">Charm</option>
-      <option value="forgehammer">Forgehammer</option>
-    </select>
-  </div>
 
-  <h3>Starting Materials</h3>
-  <div class="row"><label id="matLabel1">Material 1</label><input type="number" id="currentMat1" min="0"></div>
-  <div class="row"><label id="matLabel2">Material 2</label><input type="number" id="currentMat2" min="0"></div>
-  <div class="row" id="matRow3"><label id="matLabel3">Artisans</label><input type="number" id="currentMat3" min="0"></div>
+<h2>Select Calculator</h2>
+<div class="row">
+  <label>Calculator</label>
+  <select id="calculatorSelect">
+    <option value="gov">Governor Gear</option>
+    <option value="charm">Charm</option>
+    <option value="forgehammer">Forgehammer</option>
+  </select>
+</div>
 
-  <h3>Add Upgrade</h3>
-  <div class="row"><label>Tier</label><select id="tierSelect"><option>Loading…</option></select></div>
+<h3>Starting Materials</h3>
+<div class="row"><label id="matLabel1">Material 1</label><input type="number" id="currentMat1"></div>
+<div class="row"><label id="matLabel2">Material 2</label><input type="number" id="currentMat2"></div>
+<div class="row" id="matRow3"><label id="matLabel3">Material 3</label><input type="number" id="currentMat3"></div>
 
-  <button id="addUpgrade" onclick="addUpgrade()">Add Upgrade</button>
-  <button id="resetBtn" onclick="resetAll()">Reset</button>
+<h3>Select Tier/Level</h3>
+<div class="row"><label>Tier</label><select id="tierSelect"></select></div>
 
-  <div id="error" class="error"></div>
-  <div class="log" id="upgradeLog"></div>
+<button id="addUpgrade" onclick="addUpgrade()">Add Upgrade</button>
+<button id="resetBtn" onclick="resetAll()">Reset</button>
 
-  <h3>Remaining Materials</h3>
-  <div id="remainingDisplay"></div>
+<div id="error" class="error"></div>
+<div class="log" id="upgradeLog"></div>
+
+<h3>Remaining Materials</h3>
+<div class="upgrade-card"><div id="remainingDisplay"></div></div>
+
 </div>
 
 <script>
-const API_BASE = "https://sheetdb.io/api/v1/uhbk5p3hj3hh8";
-let tiersData = [];
-let remaining = null;
-let upgrades = [];
+const API_BASE="https://sheetdb.io/api/v1/uhbk5p3hj3hh8";
+let tiersData=[], upgrades=[], remaining=null;
 
-const normalize = s => String(s).toLowerCase().replace(/\s+/g,'');
+const normalize=s=>String(s).toLowerCase().replace(/\s+/g,'');
 
-function getApiUrlForCalculator(calc) {
-  switch(calc) {
-    case 'gov': return `${API_BASE}?sheet=Gov Gear Material Cost`;
-    case 'charm': return `${API_BASE}?sheet=Charm Upgrade Cost`;
-    case 'forgehammer': return `${API_BASE}?sheet=Forgehammer Cost`;
+function getApiUrl(calc){
+  if(calc==='gov') return `${API_BASE}?sheet=Gov Gear Material Cost`;
+  if(calc==='charm') return `${API_BASE}?sheet=Charm Upgrade Cost`;
+  return `${API_BASE}?sheet=Forgehammer Cost`;
+}
+
+function updateMaterialLabels(calc){
+  if(calc==='gov'){
+    matLabel1.textContent='Satin';
+    matLabel2.textContent='Threads';
+    matLabel3.textContent='Artisans';
+    matRow3.style.display='flex';
+  } else if(calc==='charm'){
+    matLabel1.textContent='Guides';
+    matLabel2.textContent='Designs';
+    matRow3.style.display='none';
+  } else {
+    matLabel1.textContent='Hammer';
+    matLabel2.textContent='Mythic Gear';
+    matRow3.style.display='none';
   }
 }
 
-function updateMaterialLabels(calc) {
-  let labels;
-  switch(calc) {
-    case 'gov': labels = ['Satin','Threads','Artisans']; document.getElementById('matRow3').style.display='flex'; break;
-    case 'charm': labels = ['Guide','Design']; document.getElementById('matRow3').style.display='none'; break;
-    case 'forgehammer': labels = ['Hammer','Mythic Gear']; document.getElementById('matRow3').style.display='none'; break;
-  }
-  document.getElementById('matLabel1').textContent = labels[0];
-  document.getElementById('matLabel2').textContent = labels[1];
-}
-
-async function loadTierCosts() {
-  const calc = document.getElementById('calculatorSelect').value;
-  const url = getApiUrlForCalculator(calc);
-  const select = document.getElementById('tierSelect');
-  select.innerHTML = '<option>Loading…</option>';
-  document.getElementById('error').textContent = '';
+async function loadTierCosts(){
+  const calc=calculatorSelect.value;
   updateMaterialLabels(calc);
+  tierSelect.innerHTML='';
+  error.textContent='';
 
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    if(!Array.isArray(data) || data.length===0) { select.innerHTML = '<option>No tiers available</option>'; return; }
+  try{
+    const res=await fetch(getApiUrl(calc));
+    const data=await res.json();
+    if(!data.length) return;
 
-    const headerMap = Object.keys(data[0]).map(k=>({raw:k, norm:normalize(k)}));
-    const tierKey = headerMap.find(h=>h.norm.includes('tier') || h.norm.includes('level'))?.raw;
-    let matKeys;
-    if(calc==='gov'){ matKeys = headerMap.slice(1,4).map(h => h.raw); }
-    else{ matKeys = headerMap.slice(1,3).map(h => h.raw); }
+    const headers=Object.keys(data[0]);
+    const tierKey=headers.find(h=>normalize(h).includes('tier')||normalize(h).includes('level'));
+    const mats=headers.filter(h=>h!==tierKey).slice(0,calc==='gov'?3:2);
 
-    if(!tierKey || matKeys.length<2){
-      throw new Error(`Sheet invalid format. Detected columns: ${Object.keys(data[0]).join(', ')}`);
-    }
-
-    tiersData = data.filter(r=>r[tierKey]).map(r=>{
-      let tierObj={ tier: r[tierKey], mat1: Number(String(r[matKeys[0]]).replace(/,/g,'')) || 0, mat2: Number(String(r[matKeys[1]]).replace(/,/g,'')) || 0 };
-      if(calc==='gov'){ tierObj.mat3 = Number(String(r[matKeys[2]]).replace(/,/g,'')) || 0; }
-      return tierObj;
-    });
-
-    select.innerHTML = '';
-    if(tiersData.length===0){select.innerHTML='<option>No tiers available</option>'; return;}
+    tiersData=data.filter(r=>r[tierKey]).map(r=>({
+      tier:r[tierKey],
+      mat1:+String(r[mats[0]]).replace(/,/g,'')||0,
+      mat2:+String(r[mats[1]]).replace(/,/g,'')||0,
+      mat3:calc==='gov'?+String(r[mats[2]]).replace(/,/g,'')||0:0
+    }));
 
     tiersData.forEach(t=>{
       const opt=document.createElement('option');
       opt.value=t.tier;
-      let init1 = document.getElementById('matLabel1').textContent.charAt(0);
-      let init2 = document.getElementById('matLabel2').textContent.charAt(0);
-      let displayText = calc==='gov' ? `(${init1}:${t.mat1} ${init2}:${t.mat2} A:${t.mat3})` : `(${init1}:${t.mat1} ${init2}:${t.mat2})`;
-      opt.textContent=`${t.tier} ${displayText}`;
-      select.appendChild(opt);
+
+      const i1=matLabel1.textContent.charAt(0);
+      const i2=matLabel2.textContent.charAt(0);
+
+      opt.textContent =
+        calc==='gov'
+          ? `${t.tier} (${i1}:${t.mat1} ${i2}:${t.mat2} A:${t.mat3})`
+          : `${t.tier} (${i1}:${t.mat1} ${i2}:${t.mat2})`;
+
+      tierSelect.appendChild(opt);
     });
 
     resetAll();
-
   } catch(e){
-    select.innerHTML = '<option>Error loading tiers</option>';
-    document.getElementById('error').textContent = e.message;
-    console.error(e);
+    error.textContent=e.message;
   }
+}
+
+function recalcRemaining(){
+  remaining={
+    mat1:+currentMat1.value||0,
+    mat2:+currentMat2.value||0,
+    mat3:calculatorSelect.value==='gov'?+currentMat3.value||0:0
+  };
+  upgrades.forEach(u=>{
+    remaining.mat1-=u.tier.mat1;
+    remaining.mat2-=u.tier.mat2;
+    if(calculatorSelect.value==='gov') remaining.mat3-=u.tier.mat3;
+  });
+}
+
+function renderRemaining(){
+  if(!remaining) return;
+  remainingDisplay.innerHTML =
+    calculatorSelect.value==='gov'
+      ? `<span class="warn">${matLabel1.textContent}: ${remaining.mat1} | ${matLabel2.textContent}: ${remaining.mat2} | ${matLabel3.textContent}: ${remaining.mat3}</span>`
+      : `<span class="warn">${matLabel1.textContent}: ${remaining.mat1} | ${matLabel2.textContent}: ${remaining.mat2}</span>`;
 }
 
 function addUpgrade(){
-  const mat1Input = Number(document.getElementById('currentMat1').value);
-  const mat2Input = Number(document.getElementById('currentMat2').value);
-  const mat3Input = Number(document.getElementById('currentMat3').value);
-
-  const tierName = document.getElementById('tierSelect').value;
-  const tier = tiersData.find(t=>t.tier===tierName);
+  const tier=tiersData.find(t=>t.tier===tierSelect.value);
   if(!tier) return;
 
-  const upgradeId = Date.now();
-  upgrades.push({id: upgradeId, tier});
+  const id=Date.now();
+  upgrades.push({id,tier});
 
-  remaining = { mat1: mat1Input, mat2: mat2Input, mat3: document.getElementById('calculatorSelect').value==='gov' ? mat3Input : 0 };
-  upgrades.forEach(u=>{
-    remaining.mat1 -= u.tier.mat1;
-    remaining.mat2 -= u.tier.mat2;
-    if(document.getElementById('calculatorSelect').value==='gov'){ remaining.mat3 -= u.tier.mat3; }
-  });
+  recalcRemaining();
+  renderRemaining();
 
-  updateRemainingDisplay();
+  const card=document.createElement('div');
+  card.className='upgrade-card';
+  card.dataset.id=id;
 
-  const logDiv = document.getElementById('upgradeLog');
-  const logEntry = document.createElement('div');
-  logEntry.className='log-entry';
-  logEntry.dataset.id = upgradeId;
+  const del=document.createElement('span');
+  del.className='delete-btn';
+  del.textContent='⛔';
+  del.onclick=()=>removeUpgrade(id);
 
-  const deleteBtn = document.createElement('span');
-  deleteBtn.className = 'delete-btn';
-  deleteBtn.textContent = '⛔';
-  deleteBtn.onclick = () => removeUpgrade(upgradeId);
-  logEntry.appendChild(deleteBtn);
+  const title=document.createElement('h4');
+  title.textContent=`Upgrade — ${tier.tier}`;
 
-  const upgradeText = document.createElement('div');
-  let init1 = document.getElementById('matLabel1').textContent.charAt(0);
-  let init2 = document.getElementById('matLabel2').textContent.charAt(0);
-  let costText = document.getElementById('calculatorSelect').value==='gov' ? `${init1} ${tier.mat1}, ${init2} ${tier.mat2}, Artisans ${tier.mat3}` : `${init1} ${tier.mat1}, ${init2} ${tier.mat2}`;
-  let remainingText = document.getElementById('calculatorSelect').value==='gov' ? `${document.getElementById('matLabel1').textContent} ${remaining.mat1}, ${document.getElementById('matLabel2').textContent} ${remaining.mat2}, ${document.getElementById('matLabel3').textContent} ${remaining.mat3}` : `${document.getElementById('matLabel1').textContent} ${remaining.mat1}, ${document.getElementById('matLabel2').textContent} ${remaining.mat2}`;
-  upgradeText.innerHTML = `<strong>Upgrade — ${tier.tier}</strong><br>Cost: ${costText}<br><span class='warn'>Remaining: ${remainingText}</span>`;
-  logEntry.appendChild(upgradeText);
+  const section=document.createElement('div');
+  section.className='upgrade-section';
+  section.textContent =
+    `${matLabel1.textContent}: ${tier.mat1} | ${matLabel2.textContent}: ${tier.mat2}` +
+    (calculatorSelect.value==='gov'
+      ? ` | ${matLabel3.textContent}: ${tier.mat3}`
+      : '');
 
-  logDiv.appendChild(logEntry);
+  card.appendChild(del);
+  card.appendChild(title);
+  card.appendChild(section);
+
+  upgradeLog.appendChild(card);
 }
 
-function removeUpgrade(upgradeId){
-  upgrades = upgrades.filter(u=>u.id!==upgradeId);
-  const mat1Input = Number(document.getElementById('currentMat1').value);
-  const mat2Input = Number(document.getElementById('currentMat2').value);
-  const mat3Input = Number(document.getElementById('currentMat3').value);
-  remaining = { mat1: mat1Input, mat2: mat2Input, mat3: document.getElementById('calculatorSelect').value==='gov' ? mat3Input : 0 };
-  upgrades.forEach(u=>{
-    remaining.mat1 -= u.tier.mat1;
-    remaining.mat2 -= u.tier.mat2;
-    if(document.getElementById('calculatorSelect').value==='gov'){ remaining.mat3 -= u.tier.mat3; }
-  });
-  updateRemainingDisplay();
-  const logDiv = document.getElementById('upgradeLog');
-  const logEntry = logDiv.querySelector(`.log-entry[data-id='${upgradeId}']`);
-  if(logEntry) logDiv.removeChild(logEntry);
-}
-
-function updateRemainingDisplay(){
-  if(!remaining) return;
-  let calc = document.getElementById('calculatorSelect').value;
-  if(calc==='gov'){
-    document.getElementById('remainingDisplay').innerHTML=`${document.getElementById('matLabel1').textContent}: <strong>${remaining.mat1}</strong><br>${document.getElementById('matLabel2').textContent}: <strong>${remaining.mat2}</strong><br>${document.getElementById('matLabel3').textContent}: <strong>${remaining.mat3}</strong>`;
-  } else {
-    document.getElementById('remainingDisplay').innerHTML=`${document.getElementById('matLabel1').textContent}: <strong>${remaining.mat1}</strong><br>${document.getElementById('matLabel2').textContent}: <strong>${remaining.mat2}</strong>`;
-  }
+function removeUpgrade(id){
+  upgrades=upgrades.filter(u=>u.id!==id);
+  const el=upgradeLog.querySelector(`[data-id="${id}"]`);
+  if(el) el.remove();
+  recalcRemaining();
+  renderRemaining();
 }
 
 function resetAll(){
-  upgrades = [];
+  upgrades=[];
+  upgradeLog.innerHTML='';
   remaining=null;
-  document.getElementById('upgradeLog').innerHTML='';
-  document.getElementById('remainingDisplay').innerHTML='';
-  document.getElementById('currentMat1').value='';
-  document.getElementById('currentMat2').value='';
-  document.getElementById('currentMat3').value='';
-  if(tiersData.length>0) document.getElementById('tierSelect').value = tiersData[0].tier;
+  remainingDisplay.innerHTML='';
+  currentMat1.value='';
+  currentMat2.value='';
+  currentMat3.value='';
+  if(tierSelect.options.length) tierSelect.selectedIndex=0;
 }
 
-document.getElementById('calculatorSelect').addEventListener('change',()=>{ loadTierCosts(); });
+calculatorSelect.addEventListener('change',loadTierCosts);
 loadTierCosts();
 </script>
+
 </body>
 </html>
