@@ -118,11 +118,11 @@ button { cursor:pointer; font-weight:bold; }
 </div>
 
 <h3>Starting Materials</h3>
-<div class="row"><label id="matLabel1">Material 1</label><input type="number" id="currentMat1"></div>
-<div class="row"><label id="matLabel2">Material 2</label><input type="number" id="currentMat2"></div>
-<div class="row" id="matRow3"><label id="matLabel3">Material 3</label><input type="number" id="currentMat3"></div>
+<div class="row"><label id="matLabel1"></label><input type="number" id="currentMat1"></div>
+<div class="row"><label id="matLabel2"></label><input type="number" id="currentMat2"></div>
+<div class="row" id="matRow3"><label id="matLabel3"></label><input type="number" id="currentMat3"></div>
 
-<h3>Select Tier/Level</h3>
+<h3>Add Upgrade</h3>
 <div class="row"><label>Tier</label><select id="tierSelect"></select></div>
 
 <button id="addUpgrade" onclick="addUpgrade()">Add Upgrade</button>
@@ -137,10 +137,12 @@ button { cursor:pointer; font-weight:bold; }
 </div>
 
 <script>
-const API_BASE="https://sheetdb.io/api/v1/uhbk5p3hj3hh8";
-let tiersData=[], upgrades=[], remaining=null;
+const API_BASE = "https://sheetdb.io/api/v1/uhbk5p3hj3hh8";
+let tiersData = [];
+let upgrades = [];
+let remaining = null;
 
-const normalize=s=>String(s).toLowerCase().replace(/\s+/g,'');
+const normalize = s => String(s).toLowerCase().replace(/\s+/g,'');
 
 function getApiUrl(calc){
   if(calc==='gov') return `${API_BASE}?sheet=Gov Gear Material Cost`;
@@ -155,8 +157,8 @@ function updateMaterialLabels(calc){
     matLabel3.textContent='Artisans';
     matRow3.style.display='flex';
   } else if(calc==='charm'){
-    matLabel1.textContent='Guides';
-    matLabel2.textContent='Designs';
+    matLabel1.textContent='Guide';
+    matLabel2.textContent='Design';
     matRow3.style.display='none';
   } else {
     matLabel1.textContent='Hammer';
@@ -166,58 +168,52 @@ function updateMaterialLabels(calc){
 }
 
 async function loadTierCosts(){
-  const calc=calculatorSelect.value;
+  const calc = calculatorSelect.value;
   updateMaterialLabels(calc);
   tierSelect.innerHTML='';
   error.textContent='';
 
-  try{
-    const res=await fetch(getApiUrl(calc));
-    const data=await res.json();
-    if(!data.length) return;
+  const res = await fetch(getApiUrl(calc));
+  const data = await res.json();
+  if(!data.length) return;
 
-    const headers=Object.keys(data[0]);
-    const tierKey=headers.find(h=>normalize(h).includes('tier')||normalize(h).includes('level'));
-    const mats=headers.filter(h=>h!==tierKey).slice(0,calc==='gov'?3:2);
+  const headers = Object.keys(data[0]);
+  const tierKey = headers.find(h=>normalize(h).includes('tier')||normalize(h).includes('level'));
+  const mats = headers.filter(h=>h!==tierKey).slice(0,calc==='gov'?3:2);
 
-    tiersData=data.filter(r=>r[tierKey]).map(r=>({
-      tier:r[tierKey],
-      mat1:+String(r[mats[0]]).replace(/,/g,'')||0,
-      mat2:+String(r[mats[1]]).replace(/,/g,'')||0,
-      mat3:calc==='gov'?+String(r[mats[2]]).replace(/,/g,'')||0:0
-    }));
+  tiersData = data.filter(r=>r[tierKey]).map(r=>({
+    tier:r[tierKey],
+    mat1:+String(r[mats[0]]).replace(/,/g,'')||0,
+    mat2:+String(r[mats[1]]).replace(/,/g,'')||0,
+    mat3:calc==='gov'?+String(r[mats[2]]).replace(/,/g,'')||0:0
+  }));
 
-    tiersData.forEach(t=>{
-      const opt=document.createElement('option');
-      opt.value=t.tier;
+  tiersData.forEach(t=>{
+    const opt=document.createElement('option');
+    const i1=matLabel1.textContent.charAt(0);
+    const i2=matLabel2.textContent.charAt(0);
+    opt.value=t.tier;
+    opt.textContent =
+      calc==='gov'
+        ? `${t.tier} (${i1}:${t.mat1} ${i2}:${t.mat2} A:${t.mat3})`
+        : `${t.tier} (${i1}:${t.mat1} ${i2}:${t.mat2})`;
+    tierSelect.appendChild(opt);
+  });
 
-      const i1=matLabel1.textContent.charAt(0);
-      const i2=matLabel2.textContent.charAt(0);
-
-      opt.textContent =
-        calc==='gov'
-          ? `${t.tier} (${i1}:${t.mat1} ${i2}:${t.mat2} A:${t.mat3})`
-          : `${t.tier} (${i1}:${t.mat1} ${i2}:${t.mat2})`;
-
-      tierSelect.appendChild(opt);
-    });
-
-    resetAll();
-  } catch(e){
-    error.textContent=e.message;
-  }
+  resetAll();
 }
 
 function recalcRemaining(){
-  remaining={
+  remaining = {
     mat1:+currentMat1.value||0,
     mat2:+currentMat2.value||0,
     mat3:calculatorSelect.value==='gov'?+currentMat3.value||0:0
   };
+
   upgrades.forEach(u=>{
-    remaining.mat1-=u.tier.mat1;
-    remaining.mat2-=u.tier.mat2;
-    if(calculatorSelect.value==='gov') remaining.mat3-=u.tier.mat3;
+    remaining.mat1 -= u.tier.mat1;
+    remaining.mat2 -= u.tier.mat2;
+    if(calculatorSelect.value==='gov') remaining.mat3 -= u.tier.mat3;
   });
 }
 
@@ -229,11 +225,17 @@ function renderRemaining(){
       : `<span class="warn">${matLabel1.textContent}: ${remaining.mat1} | ${matLabel2.textContent}: ${remaining.mat2}</span>`;
 }
 
+function recalcFromInputs(){
+  if(upgrades.length===0) return;
+  recalcRemaining();
+  renderRemaining();
+}
+
 function addUpgrade(){
-  const tier=tiersData.find(t=>t.tier===tierSelect.value);
+  const tier = tiersData.find(t=>t.tier===tierSelect.value);
   if(!tier) return;
 
-  const id=Date.now();
+  const id = Date.now();
   upgrades.push({id,tier});
 
   recalcRemaining();
@@ -262,13 +264,12 @@ function addUpgrade(){
   card.appendChild(del);
   card.appendChild(title);
   card.appendChild(section);
-
   upgradeLog.appendChild(card);
 }
 
 function removeUpgrade(id){
-  upgrades=upgrades.filter(u=>u.id!==id);
-  const el=upgradeLog.querySelector(`[data-id="${id}"]`);
+  upgrades = upgrades.filter(u=>u.id!==id);
+  const el = upgradeLog.querySelector(`[data-id="${id}"]`);
   if(el) el.remove();
   recalcRemaining();
   renderRemaining();
@@ -284,6 +285,11 @@ function resetAll(){
   currentMat3.value='';
   if(tierSelect.options.length) tierSelect.selectedIndex=0;
 }
+
+['currentMat1','currentMat2','currentMat3'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('input', recalcFromInputs);
+});
 
 calculatorSelect.addEventListener('change',loadTierCosts);
 loadTierCosts();
