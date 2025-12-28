@@ -314,10 +314,12 @@ function addUpgrade(){
 
   const s=document.createElement('div');
   s.className='upgrade-section';
-  s.textContent=
-    `Satin: ${t.mat1} | Threads: ${t.mat2}`+
-    (calculatorSelect.value==='gov'?` | Artisans: ${t.mat3}`:'');
-
+  s.textContent =
+  `${matLabel1.textContent}: ${t.mat1} | ${matLabel2.textContent}: ${t.mat2}` +
+  (calculatorSelect.value === 'gov'
+    ? ` | ${matLabel3.textContent}: ${t.mat3}`
+    : '');
+  
   c.append(d,h,s);
   upgradeLog.appendChild(c);
 }
@@ -352,4 +354,5 @@ loadTierCosts();
 
 </body>
 </html>
+
 
