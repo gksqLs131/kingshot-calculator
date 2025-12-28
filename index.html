@@ -337,6 +337,7 @@ function resetAll(){
   remaining=null;
   remainingDisplay.innerHTML='';
   currentMat1.value=currentMat2.value=currentMat3.value='';
+  if (tierSelect.options.length) tierSelect.selectedIndex = 0;
 }
 
 ['currentMat1','currentMat2','currentMat3'].forEach(id=>{
@@ -354,5 +355,6 @@ loadTierCosts();
 
 </body>
 </html>
+
 
 
